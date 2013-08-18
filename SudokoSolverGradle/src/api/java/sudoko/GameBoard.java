@@ -11,7 +11,7 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
  * @author Home
  *
  */
-public class GameBoard {
+public class GameBoard implements Runnable {
 	
 	private ArrayList<Cell> theBoard;
 	private boolean someSolvedValues;
@@ -300,5 +300,13 @@ public ArrayList<Cell> getLowestPValueCells() {
 }
 public void setLowestPValueCells(ArrayList<Cell> lowestPValueCells) {
 	this.lowestPValueCells = lowestPValueCells;
+}
+@Override
+public void run() {
+	for (Cell cell : theBoard) {
+		for(int value = 1; value <= 9; value++)
+			checkAll(cell, value);
+	}
+	
 }
 }
