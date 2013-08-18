@@ -1,0 +1,80 @@
+apply plugin: "java"
+apply plugin: "maven"
+apply plugin: "eclipse"
+apply plugin: "application"
+
+group = "John"
+version = 1.0
+
+repositories {
+    mavenCentral()
+
+}
+sourceSets.all { set ->
+    def jarTask = task("${set.name}Jar", type: Jar) {
+        baseName = baseName + "-$set.name"
+        from set.output
+    }
+
+    artifacts {
+        archives jarTask
+    }
+}
+
+sourceSets {
+    api
+    impl
+}
+
+dependencies {
+
+	compile 'commons-collections:commons-collections:3.2.1'
+    apiCompile 'commons-codec:commons-codec:1.5' , 'commons-collections:commons-collections:3.2.1' , 'commons-lang:commons-lang:2.6'
+
+	
+	
+	
+	implCompile 'commons-collections:commons-collections:3.2.1'
+    implCompile sourceSets.api.output
+    implCompile 'commons-lang:commons-lang:2.6'
+
+    testCompile 'junit:junit:4.9'
+    testCompile sourceSets.api.output
+    testCompile sourceSets.impl.output
+    runtime configurations.apiRuntime
+    runtime configurations.implRuntime
+}
+
+jar {
+    from sourceSets.api.output
+    from sourceSets.impl.output
+    mainClassName = 'sudoko.GameBoard'
+    manifest {
+        attributes("Main-Class": "sudoko.GameBoard")
+    }
+}
+
+
+mainClassName = 'sudoko.GameBoard'
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            repository(url: uri("${buildDir}/repo"))
+
+            addFilter("main") { artifact, file -> artifact.name == project.name }
+            ["api", "impl"].each { type ->
+                addFilter(type) { artifact, file -> artifact.name.endsWith("-$type") }
+                
+                // We now have to map our configurations to the correct maven scope for each pom
+                ["compile", "runtime"].each { scope ->
+                    configuration = configurations[type + scope.capitalize()]
+                    ["main", type].each { pomName ->
+                        pom(pomName).scopeMappings.addMapping 1, configuration, scope
+                    }
+                }
+            }
+
+        }
+    }
+}
