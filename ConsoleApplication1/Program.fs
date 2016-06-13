@@ -3,7 +3,6 @@
 
 module Solver =
 
-    let start = System.DateTime.Now
 
     open Microsoft.FSharp.Core.Operators
 
@@ -124,33 +123,44 @@ module Solver =
 //            printfn "Compared to"
 //            printCell cells.Head
 
-    let rec trySolveValues (cell:Cell, cells:List<Cell> ) =
-        if(cells.IsEmpty) then cell
-        else
-            if(cell.checkConflicts cells.Head)
-            then trySolveValues(Cell(cell.Row, cell.Column, cell.PossibleValues |> List.filter (fun x -> x <> cells.Head.PossibleValues.[0])), cells.Tail)
-            else trySolveValues(cell, cells.Tail)
+    let rec trySolveValues (cell:Cell) cells  =
+        match cells with
+        | [] -> cell
+        | head :: tail ->
+            if cell.checkConflicts head
+            then trySolveValues (Cell(cell.Row, cell.Column, cell.PossibleValues |> List.filter (fun x -> x <> head.PossibleValues.[0]))) tail
+            else trySolveValues cell tail
     
-    let rec solvePassOnAllCells (cells:List<Cell>, solvedCells:List<Cell>, checkedCells:List<Cell>) =
-        if(cells.IsEmpty)
-         then checkedCells |> List.append solvedCells
-        else 
-            let appendedCheckedCells = trySolveValues(cells.Head, solvedCells |> List.filter(fun x -> cells.Head.IsDifferent x)) :: checkedCells
-            solvePassOnAllCells(cells.Tail, solvedCells, appendedCheckedCells)
+    let rec solvePassOnAllCells cells solvedCells checkedCells =
+        match cells with
+        | [] -> checkedCells |> List.append solvedCells
+        | head :: tail ->
+            let appendedCheckedCells = trySolveValues head (solvedCells |> List.filter(fun x -> head.IsDifferent x)) :: checkedCells
+            solvePassOnAllCells tail solvedCells appendedCheckedCells
 
-    let rec checkAllGrids (uncheckedGrids:List<Grid>, checkedGrids:List<Grid>) =
-        if(uncheckedGrids.IsEmpty) then checkedGrids 
-        else
-            let appendedCheckedGrids = Grid(9 ,9, solvePassOnAllCells(uncheckedGrids.Head.unsolvedCells, uncheckedGrids.Head.solvedCells, []), uncheckedGrids.Head.Level + 1) :: checkedGrids
-            checkAllGrids(uncheckedGrids.Tail, appendedCheckedGrids)
+
+    let rec checkAllGrids (uncheckedGrids:Grid list) checkedGrids =
+        match uncheckedGrids with 
+        | [] -> checkedGrids
+        | head :: tail ->
+            let appendedCheckedGrids = Grid(9 ,9, solvePassOnAllCells head.unsolvedCells head.solvedCells [], head.Level + 1) :: checkedGrids
+            checkAllGrids uncheckedGrids.Tail appendedCheckedGrids
 
     let rec solvePuzzle input:List<Grid> =
-        printGrids input
+//        printGrids input
         let finishedGrids = (input |> List.filter(fun (x:Grid) -> x.isFinished))
         let solved = finishedGrids.Length > 0
-        if(solved) then finishedGrids
-        else
-            let appendedGrids = input |> List.append(checkAllGrids(input, []))
+        match solved with
+        | true -> finishedGrids
+        | false ->
+            let maxLevel = 
+                input
+                |> List.map(fun x -> x.Level)
+                |> List.max
+
+            let gridsToBeChecked = input |> List.filter(fun x -> x.Level = maxLevel)
+//            printGrids gridsToBeChecked
+            let appendedGrids = input |> List.append(checkAllGrids gridsToBeChecked [])
             solvePuzzle(appendedGrids)
             
                 
@@ -189,23 +199,27 @@ module Solver =
     let grids = startingGrid :: []
 
     
-    let finishedGrids = solvePuzzle grids
+    let finishedGrids = lazy (solvePuzzle grids)
 
-    for grid in finishedGrids
-        do printGrid grid
+    let printSolution grids =
+        for grid in grids
+         do printGrid grid
 
 //    printGrid startingGrid
 
-    let endTime = System.DateTime.Now
 
-    let span = endTime.Subtract(start).ToString()
 
-    printf "%s" span
 
-    System.Console.Read() |> ignore
+    
 
 [<EntryPoint>]
 let main argv = 
+    let start = System.DateTime.Now
+    Solver.printSolution (Solver.finishedGrids.Force())
+    let endTime = System.DateTime.Now
+    let span = endTime.Subtract(start).ToString()
+    printf "%s" span
+    System.Console.Read() |> ignore
     0 // return an integer exit code
 
 
