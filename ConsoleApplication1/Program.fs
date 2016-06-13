@@ -147,7 +147,6 @@ module Solver =
             checkAllGrids uncheckedGrids.Tail appendedCheckedGrids
 
     let rec solvePuzzle input:List<Grid> =
-//        printGrids input
         let finishedGrids = (input |> List.filter(fun (x:Grid) -> x.isFinished))
         let solved = finishedGrids.Length > 0
         match solved with
@@ -159,53 +158,29 @@ module Solver =
                 |> List.max
 
             let gridsToBeChecked = input |> List.filter(fun x -> x.Level = maxLevel)
-//            printGrids gridsToBeChecked
             let appendedGrids = input |> List.append(checkAllGrids gridsToBeChecked [])
             solvePuzzle(appendedGrids)
             
                 
 
 
-    printfn "Grid"
+    printfn "Input Puzzle"
     printfn ""
     printGrid startingGrid
 
-//    printfn "Rows:"
-//    printfn ""
-//    printRow startingGrid
-//
-//    printfn "Columns:"
-//    printfn ""
-//    printColumn startingGrid
-//
-//    printfn "Column Groups:"
-//    printfn ""
-//    printColumnGroups startingGrid
-//
-//    printfn "Row Groups:"
-//    printfn ""
-//    printRowGroups startingGrid
-
-//Simple solve method for a sudoku no support for when there are logical guesses outside the simple solving framework
-//    while isFinished startingGrid do
-//    
-//        printfn "Number of solved cells %i" (solvedCells startingGrid).Length
-//
-//        printGrid startingGrid
-//    
-//        for cell in unsolvedCells startingGrid do
-//            checkCellPossibleValues (cell, startingGrid)
 
     let grids = startingGrid :: []
 
     
     let finishedGrids = lazy (solvePuzzle grids)
 
-    let printSolution grids =
-        for grid in grids
-         do printGrid grid
+    let printSolution someGrids =
+        for grid in someGrids
+         do 
+            let index = someGrids |> List.tryFindIndex(fun x -> x = grid)
+            printfn "Solution Number: %A" (index.Value + 1)
+            printGrid grid
 
-//    printGrid startingGrid
 
 
 
