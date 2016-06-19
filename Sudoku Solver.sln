@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.24720.0
+# Visual Studio 15
+VisualStudioVersion = 15.0.25302.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "ConsoleApplication1", "ConsoleApplication1\ConsoleApplication1.fsproj", "{F697BD8B-5C35-4951-83EA-0B134E1537FB}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Solver", "ConsoleApplication1\Solver.fsproj", "{F697BD8B-5C35-4951-83EA-0B134E1537FB}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Tutorial1", "Tutorial1\Tutorial1.fsproj", "{7BFDB012-FFCE-4542-951D-E26401321F03}"
 EndProject
