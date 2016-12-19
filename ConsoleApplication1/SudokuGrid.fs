@@ -3,7 +3,7 @@
 open SudokuCell
 
 type Grid = 
-        {numberOfRows : int; numberOfColumns : int; cells : Cell list; level : int;}
+        {numberOfRows : int; numberOfColumns : int; cells : Cell list; level : int; parent : int}
 
 
 let SolvedCells cells     = cells |> List.filter (Solved)

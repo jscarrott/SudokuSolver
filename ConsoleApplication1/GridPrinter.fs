@@ -28,3 +28,9 @@ let printGrids (grids : Grid List) =
     printfn "Printing Grids"
     for grid in grids do
         printGrid grid
+
+let printSolution someGrids = 
+    for grid in someGrids do
+        let index = someGrids |> List.tryFindIndex (fun x -> x = grid)
+        printfn "Solution Number: %A" (index.Value + 1)
+        printGrid grid

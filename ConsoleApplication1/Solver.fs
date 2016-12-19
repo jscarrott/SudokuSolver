@@ -26,13 +26,13 @@ let checkAllGrids uncheckedGrids =
     uncheckedGrids |> List.fold ( fun acc elem -> 
         let unsolved = UnsolvedCells elem.cells
         let solved = SolvedCells elem.cells
-        {elem with cells = solvePassOnAllCells unsolved solved; level = elem.level + 1} :: acc) []
+        {elem with cells = solvePassOnAllCells unsolved solved; level = elem.level + 1; parent = elem.GetHashCode()} :: acc) []
 
 let rec solvePuzzle (input : Grid list) = 
     let finishedGrids = input |> List.filter(IsGridFinished) 
     let solved = finishedGrids.Length > 0
     match solved with
-    | true -> finishedGrids
+    | true -> (finishedGrids, input)
     | false -> 
         let maxLevel = 
             input
@@ -43,6 +43,24 @@ let rec solvePuzzle (input : Grid list) =
         let appendedGrids = input |> List.append (checkAllGrids gridsToBeChecked)
         solvePuzzle (appendedGrids)
 
+
+let indexGridsByHash grids = 
+    let emptyMap = Map.empty
+    grids |> List.fold( fun (acc : Map<int, Grid>) elem -> acc.Add(elem.GetHashCode(), elem)) emptyMap
+
+let traverseSolution (finishedGrid : Grid) (allGrids : Map<int, Grid>) = 
+    let rec buildHistory hash listOfHashes = 
+        match hash with 
+        | 0 -> 0 :: listOfHashes
+        | _ -> 
+            let appendedList = hash :: listOfHashes
+            let nextParent = allGrids.[hash].parent
+            buildHistory nextParent appendedList
+    let hashCode = finishedGrid.GetHashCode()
+    let history = buildHistory hashCode []
+    for entry in history do
+        printfn "%A" entry
+
 printfn "Input Puzzle"
 printfn ""
 printGrid startingGrid
@@ -50,8 +68,4 @@ printGrid startingGrid
 let grids = [ startingGrid ]
 let finishedGrids = lazy (solvePuzzle grids)
 
-let printSolution someGrids = 
-    for grid in someGrids do
-        let index = someGrids |> List.tryFindIndex (fun x -> x = grid)
-        printfn "Solution Number: %A" (index.Value + 1)
-        printGrid grid
+

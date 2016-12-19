@@ -21,7 +21,7 @@ let startingGrid =
     {numberOfRows = parseCells.Length; numberOfColumns = parseCells.[0].Length;
            cells = [ for i = 0 to parseCells.Length - 1 do
                         for j = 0 to parseCells.[0].Length - 1 do
-                           yield {row = i + 1; column = j + 1; possibleValues = parseCellValue parseCells.[i].[j]} ]; level = 1}
+                           yield {row = i + 1; column = j + 1; possibleValues = parseCellValue parseCells.[i].[j]} ]; level = 1; parent = 0}
 //            printfn "this cell"
 //            printCell cell
 //            printfn "Compared to"

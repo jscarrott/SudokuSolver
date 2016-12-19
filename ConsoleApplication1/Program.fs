@@ -1,9 +1,14 @@
 ﻿open SudukoSolver
+open GridPrinter
 
 [<EntryPoint>]
 let main argv =
     let start = System.DateTime.Now
-    printSolution (finishedGrids.Force())
+    let solution = finishedGrids.Force()
+    let (finishedGrids, allGrids) = solution
+    printSolution (finishedGrids)
+    let indexedGrids = indexGridsByHash allGrids
+    traverseSolution finishedGrids.[0] indexedGrids
     let endTime = System.DateTime.Now
     let span = endTime.Subtract(start).ToString()
     printf "%s" span
