@@ -8,31 +8,25 @@ open SudokuGrid
 open GridPrinter
 open GridParser
 
-let rec trySolveValues (cell : Cell) cells = 
-    match cells with
-    | [] -> cell
-    | head :: tail -> 
-        if checkConflicts cell head then 
-            trySolveValues ({ row = cell.row
-                              column = cell.column
-                              possibleValues = cell.possibleValues |> List.filter (fun x -> x <> head.possibleValues.[0]) }) tail
-        else trySolveValues cell tail
 
-let rec solvePassOnAllCells cells solvedCells checkedCells = 
-    match cells with
-    | [] -> checkedCells |> List.append solvedCells
-    | head :: tail -> 
-        let appendedCheckedCells = trySolveValues head (solvedCells |> List.filter (fun x -> isDifferent head x)) :: checkedCells
-        solvePassOnAllCells tail solvedCells appendedCheckedCells
+let rec trySolveValues cell (cells : Cell list) =    
+    if cells.IsEmpty then cell
+    else
+        match checkConflicts cell cells.Head  with
+        | true -> {cell with possibleValues  = cell.possibleValues |> List.filter (fun x -> x <> cells.Head.possibleValues.[0])}
+        | false -> cell
+        |> (fun cell -> trySolveValues cell cells.Tail)
 
-let rec checkAllGrids (uncheckedGrids : Grid list) checkedGrids = 
-    match uncheckedGrids with
-    | [] -> checkedGrids
-    | head :: tail -> 
-        let unsolved = UnsolvedCells head.cells
-        let solved = SolvedCells head.cells
-        let appendedCheckedGrids = {numberOfRows = 9; numberOfColumns = 9; cells = solvePassOnAllCells unsolved solved []; level = head.level + 1} :: checkedGrids
-        checkAllGrids uncheckedGrids.Tail appendedCheckedGrids
+
+let solvePassOnAllCells unsolvedCells solvedCells = 
+    unsolvedCells |> List.fold (fun acc elem-> (trySolveValues elem solvedCells) :: acc) [] |> List.append solvedCells
+
+
+let checkAllGrids uncheckedGrids =
+    uncheckedGrids |> List.fold ( fun acc elem -> 
+        let unsolved = UnsolvedCells elem.cells
+        let solved = SolvedCells elem.cells
+        {elem with cells = solvePassOnAllCells unsolved solved; level = elem.level + 1} :: acc) []
 
 let rec solvePuzzle (input : Grid list) = 
     let finishedGrids = input |> List.filter(IsGridFinished) 
@@ -46,7 +40,7 @@ let rec solvePuzzle (input : Grid list) =
             |> List.max
         
         let gridsToBeChecked = input |> List.filter (fun x -> x.level = maxLevel)
-        let appendedGrids = input |> List.append (checkAllGrids gridsToBeChecked [])
+        let appendedGrids = input |> List.append (checkAllGrids gridsToBeChecked)
         solvePuzzle (appendedGrids)
 
 printfn "Input Puzzle"

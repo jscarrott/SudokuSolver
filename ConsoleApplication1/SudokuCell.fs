@@ -30,8 +30,10 @@ let columnGroup cell               = int (roundUpForGrouping (float (cell.column
 let rowGroup cell                  = int (roundUpForGrouping (float (cell.row) / 3.0))
 let Solved cell                    = cell.possibleValues.Length = 1
 let ID cell                        = (cell.column, cell.row)
-let isTheSame cell otherCell       = (cell.column = otherCell.column) && (cell.row = otherCell.row)
-let isDifferent cell otherCell     = not (isTheSame cell otherCell)
+
+let isDifferent cells =
+    if((cells.cell.column = cells.otherCell.column) && (cells.cell.row = cells.otherCell.row)) then Success cells
+    else Failure cells
 
 let columnMatch cells = 
     if(cells.cell.column = cells.otherCell.column) then Success cells
@@ -51,7 +53,8 @@ let valueConflict cells =
 let checkConflicts cell otherCell =
     let result = 
             {cell = cell; otherCell = otherCell}
-            |> columnMatch
+            |> isDifferent
+            >>= columnMatch
             >>= rowMatch
             >>= groupMatch
 
