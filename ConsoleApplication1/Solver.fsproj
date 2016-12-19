@@ -49,8 +49,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
-    <Compile Include="Cell.fs" />
-    <Compile Include="Grid.fs" />
+    <Compile Include="SudokuCell.fs" />
+    <Compile Include="SudokuGrid.fs" />
+    <Compile Include="GridPrinter.fs" />
+    <Compile Include="GridParser.fs" />
     <Compile Include="Solver.fs" />
     <None Include="App.config" />
     <Compile Include="Program.fs" />
